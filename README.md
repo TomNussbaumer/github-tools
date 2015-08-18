@@ -54,7 +54,13 @@ When you are using bash, the startup script is called '.bashrc' and is located i
 
 ```shell
 # Note the dot at the beginning of the line followed by a space!
-. path-to-file/github-tools-include
+. path-to-file/github-tools-includes
+```
+
+**OR just copy-and-paste the following into a terminal window (Ctrl+Shift+V):**
+
+```shell
+curl -s https://raw.githubusercontent.com/TomNussbaumer/github-tools/master/install-to-bashrc.sh | bash
 ```
 
 When you are not using the bash shell, then the name of the startup script will be different, but the procedure will be the same.
@@ -73,7 +79,6 @@ Beware of github user `tmp` while testing ;)
 
 ### TODO
 
-  1. Add a simple installation script for on-the-fly installation (in the `curl an-url | bash` style)
-  2. Add bash commandline completion (really?)
+  1. Add bash commandline completion (really?)
 
 
