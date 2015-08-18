@@ -52,8 +52,8 @@ rm -rf "invalid user"
 
 KNOWN_USERID="XXXHopefully-This-User-Will-Never-Be-On-GithubXXX"
 
-testEqualsZero    "get info of valid user"              gh_user_json
-testNotEqualsZero "get info of an invalid user"         gh_user_json $KNOWN_USERID
+testEqualsZero    "get info of valid user"              gh_info_json
+testNotEqualsZero "get info of an invalid user"         gh_info_json $KNOWN_USERID
 testEqualsZero    "get repos (json) of valid user"      gh_repos_json
 testNotEqualsZero "get repos (json) of an invalid user" gh_repos_json $KNOWN_USERID
 testEqualsZero    "get repos (url) of valid user"       gh_repos_urls
