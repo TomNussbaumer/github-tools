@@ -57,7 +57,9 @@ When you are using bash, the startup script is called '.bashrc' and is located i
 . path-to-file/github-tools-includes
 ```
 
-**OR just copy-and-paste the following into a terminal window (Ctrl+Shift+V):**
+**...OR...** 
+
+**... just copy-and-paste the following line into a terminal window:**
 
 ```shell
 curl -s https://raw.githubusercontent.com/TomNussbaumer/github-tools/master/install-to-bashrc.sh | bash
