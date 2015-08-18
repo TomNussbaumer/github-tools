@@ -68,6 +68,8 @@ All commands return valid exitcodes (0 for success). Just make sure that file `g
 
 There is a simple test script called `test-github-tools.sh` to verify the correctness of the main features.
 
+Beware of github user `tmp` while testing ;)
+
 
 ### TODO
 
