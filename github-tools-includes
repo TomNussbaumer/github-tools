@@ -65,6 +65,13 @@ __gh_error () {
   printf '[ERROR] %s\n' "$*" 1>&2
 }
 
+__gh_info () {
+  printf '[INFO] %s\n' "$*"
+}
+
+__gh_warn () {
+  printf '[WARNING] %s\n' "$*" 1>&2
+}
 
 __gh_rm_path () {
   echo "$*" | sed 's/.*\/\(.*\)$/\1/g'
@@ -162,7 +169,7 @@ gh_repos_urls () {
   ###############################################################
   ## NOTE: local json=$(...) would destroy the content of $? !!!
   ###############################################################
-  local json;
+  local json
   json=$(gh_repos_json "$*")
   local ret=$?
   [ $ret -ne 0 ] && return $ret
@@ -170,13 +177,64 @@ gh_repos_urls () {
 }
 
 gh_repos () {
-  local urls;
+  local urls
   urls=$(gh_repos_urls "$*")
   local ret=$?
   [ $ret -ne 0 ] && return $ret
   echo "$urls" | sed -e 's/.*\/\(.*\)\.git$/\1/g'
 }
 
+gh_backup () {
+  local urllist
+  urllist=$(gh_repos_urls "$*")
+  local ret=$?
+  [ $ret -ne 0 ] && return $ret
+
+  local cnt_repo=0
+  local cnt_clone=0
+  local cnt_clone_err=0
+  local cnt_pull=0
+  local cnt_pull_err=0
+  local repo_url
+  local repo
+
+  for repo_url in $urllist; do
+    repo=$(echo $repo_url | sed -e 's/^.*\///' -e 's/\.git$//')
+    __gh_info "processing [$repo]"
+    cnt_repo=$(expr $cnt_repo + 1)
+    if [ -d "$repo" ]; then
+      __gh_info "using 'git pull'"
+      cd $repo
+      git pull -q
+      if [ $? -ne 0 ]; then
+        __gh_warn "failed to pull repo [$repo]"
+        cnt_pull_err=$(expr $cnt_pull_err + 1)
+      else
+        cnt_pull=$(expr $cnt_pull + 1)
+      fi
+      cd ..
+    else
+      __gh_info "using 'git clone' with url [$repo_url]"
+      git clone -q $repo_url
+
+      if [ $? -ne 0 ]; then
+        __gh_warn "failed to clone repo [$repo]"
+        cnt_clone_err=$(expr $cnt_clone_err + 1)
+      else
+        cnt_clone=$(expr $cnt_clone + 1)
+      fi
+    fi
+  done
+
+  __gh_info "total: $cnt_repo pulled: $cnt_pull err_pulled: $cnt_pull_err cloned: $cnt_clone err_cloned: $cnt_clone_err"
+
+  if [ $cnt_clone_err -ne 0 ] || [ $cnt_pull_err -ne 0 ]; then
+    __gh_warn "some repositories couldn't be cloned or pulled"
+    return 1
+  else
+    return 0
+  fi
+}
 
 ght () {  
   case "$1" in
@@ -185,10 +243,10 @@ ght () {
     "clone")      shift; gh_clone      "$@";;
     "info")       shift; gh_info_json  "$@";;
     "repos")      shift; gh_repos      "$@";;
-    "repos-url")  shift; gh_repos_url  "$@";;
+    "repos-urls") shift; gh_repos_urls "$@";;
     "repos-json") shift; gh_repos_json "$@";;
-    "backup")     echo "soon";; #shift; gh_backup     "$@";;
-  *)             gh_help;;
+    "backup")     shift; gh_backup     "$@";;
+    *)            gh_help;;
   esac
 }
 
