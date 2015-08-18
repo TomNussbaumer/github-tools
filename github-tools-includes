@@ -1,0 +1,179 @@
+# there-is-no-she-bang
+#
+# github-tools: utility scripts for using github
+#
+# This shell scriplet is meant to be sourced in .bashrc or similiar startup 
+# scripts.
+#
+# requirements:
+# 
+#   (1) any POSIX compliant shell
+#   (2) curl
+#   (3) POSIX compliant awk
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2015 Tom Nussbaumer <thomas.nussbaumer@gmx.net>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+export GHTOOLS_VERSION="1.0.0-beta"
+export GHTOOLS_DEBUG=abc
+
+__gh_debug () {
+  [ -n "$GHTOOLS_DEBUG" ] && printf '%s\n' "$*" 1>&2
+}
+
+__gh_error () {
+  printf '[ERROR] %s\n' "$*" 1>&2
+}
+
+
+__gh_rm_path () {
+  echo "$*" | sed 's/.*\/\(.*\)$/\1/g'
+}
+
+__gh_local_dir () {
+  __gh_rm_path $(pwd)
+} 
+
+gh_help () {
+  cat << END-OF-USAGE-TEXT
+-------------------------------------------------------------------------------
+github-tools help ($GHTOOLS_VERSION)
+-------------------------------------------------------------------------------
+All the github tools (gh-*) are based on conventions. Unless stated otherwise,
+the name of the current working directory is used as github user-id.
+
+<param> == required parameter
+[param] == optional parameter
+
+gh_help               ... displays this page
+gh_clone <repo>       ... clones a repository 
+gh_user_json [user]   ... returns account information in json format 
+gh_repos [user]       ... returns list of repository names 
+gh_repos_urls [user]  ... returns list of repository urls
+gh_repos_json [user]  ... returns repos informations in json format
+
+END-OF-USAGE-TEXT
+}
+
+## that one is a bitch ...
+__gh_url_encode() {
+  export LANG=C  
+  __gh_debug "encoding [$*]"
+  echo "$@" | awk '
+    BEGIN {
+    # We assume an awk implementation that is just plain dumb.
+    # We will convert an character to its ASCII value with the
+    # table ord[], and produce two-digit hexadecimal output
+    # without the printf("%02X") feature.
+
+    EOL = "%0A"     # "end of line" string (encoded)
+    split ("1 2 3 4 5 6 7 8 9 A B C D E F", hextab, " ")
+    hextab [0] = 0
+    for ( i=1; i<=255; ++i ) ord [ sprintf ("%c", i) "" ] = i + 0
+    EncodeEOL = 0; # no end-of-line encoding for now
+    }
+    {
+    encoded = ""
+    for ( i=1; i<=length ($0); ++i ) {
+        c = substr ($0, i, 1)
+        if ( c ~ /[a-zA-Z0-9.-]/ ) {
+        encoded = encoded c     # safe character
+        } else if ( c == " " ) {
+        encoded = encoded "+"   # special handling
+        } else {
+        # unsafe character, encode it as a two-digit hex-number
+        lo = ord [c] % 16
+        hi = int (ord [c] / 16);
+        encoded = encoded "%" hextab [hi] hextab [lo]
+        }
+    }
+    if ( EncodeEOL ) {
+        printf ("%s", encoded EOL)
+    } else {
+        print encoded
+    }
+    }
+    END {
+        #if ( EncodeEOL ) print ""
+    }
+  '
+}
+
+gh_clone () {
+  [ $# -ne 1 ] && echo "USAGE: $0 repository" && return 1
+  local url="git@github.com:$(__gh_url_encode $(__gh_local_dir))/$(__gh_url_encode ${1}).git"
+  __gh_debug "rest-url: [$url]"
+  git clone $url
+}
+
+__gh_param_or_dir () {
+  local userid;
+  if [ -z "$1" ]; then
+     __gh_local_dir
+  else
+     echo "$*"
+  fi
+}
+
+__gh_fetch_and_check () {
+  __gh_debug "rest-url: [$*]"
+  local json;
+  json=$(curl -s "$*")
+  local ret=$?
+  [ $ret -ne 0 ] && return $ret
+  [ -n "$(echo \"$json\" | grep 'Not Found')" ] && return 1 || echo "$json"
+}
+
+
+gh_user_json () {
+  local userid=$(__gh_param_or_dir "$*")
+  __gh_fetch_and_check "https://api.github.com/users/$(__gh_url_encode ${userid})"
+  local ret=$?
+  [ $ret -ne 0 ] && __gh_error "fetching data for user [${userid}] failed" && return $ret || return 0
+}
+
+gh_repos_json () {
+  local userid=$(__gh_param_or_dir "$*")
+  __gh_fetch_and_check "https://api.github.com/users/$(__gh_url_encode ${userid})/repos"
+  local ret=$?
+  [ $ret -ne 0 ] && __gh_error "fetching repos for user [${userid}] failed" && return $ret || return 0
+}
+
+gh_repos_urls () {
+  ###############################################################
+  ## NOTE: local json=$(...) would destroy the content of $? !!!
+  ###############################################################
+  local json;
+  json=$(gh_repos_json "$*")
+  local ret=$?
+  [ $ret -ne 0 ] && return $ret
+  echo "$json" | grep "ssh_url" |  awk '{print $2}' | sed -e 's/\"//g' -e 's/,//g'
+}
+
+gh_repos () {
+  local urls;
+  urls=$(gh_repos_urls "$*")
+  local ret=$?
+  [ $ret -ne 0 ] && return $ret
+  echo "$urls" | sed -e 's/.*\/\(.*\)\.git$/\1/g'
+}
+
