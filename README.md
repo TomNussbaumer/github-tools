@@ -68,3 +68,10 @@ All commands return valid exitcodes (0 for success). Just make sure that file `g
 
 There is a simple test script called `test-github-tools.sh` to verify the correctness of the main features.
 
+
+### TODO
+
+  1. Add a simple installation script for on-the-fly installation (in the `curl an-url | bash` style)
+  2. Add bash commandline completion (really?)
+
+
