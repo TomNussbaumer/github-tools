@@ -236,6 +236,13 @@ gh_backup () {
   fi
 }
 
+# TODO: idea 
+#
+# integrate the github markdown tools for transforming markdown to html
+# and then serve it via netcat once ...
+#
+# { echo -ne "HTTP/1.0 200 OK\r\nContent-Length: $(wc -c <some.file)\r\n\r\n"; cat some.file; } | nc -l -p 8080
+
 ght () {  
   case "$1" in
     "version")    echo "ght $GHTOOLS_VERSION (c) Tom Nussbaumer <thomas.nussbaumer@gmx.net>";;
@@ -249,7 +256,3 @@ ght () {
     *)            gh_help;;
   esac
 }
-
-
-
-
