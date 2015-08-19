@@ -33,7 +33,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-export GHTOOLS_VERSION="1.0.0"
+export GHTOOLS_VERSION="1.1.0 (beta)"
 export GHTOOLS_DEBUG=
 
 gh_help () {
@@ -51,6 +51,7 @@ repos-urls [user-id]   ... returns list of repository urls
 repos-json [user-id]   ... returns repos informations in json format
 backup [user-id]       ... loop through all repos of a user account and either
                            clones them or uses 'git pull' to update them.
+debug [on]             ... enables/disables debug (without parameter == off]
 
 If you omit the optional parameter user-id, the name of the active working 
 directory will be used as github user-id.
@@ -58,7 +59,7 @@ END-OF-USAGE-TEXT
 }
 
 __gh_debug () {
-  [ -n "$GHTOOLS_DEBUG" ] && printf '%s\n' "$*" 1>&2
+  [ -n "$GHTOOLS_DEBUG" ] && printf '[DEBUG] %s\n' "$*" 1>&2
 }
 
 __gh_error () {
@@ -245,7 +246,7 @@ gh_backup () {
 
 ght () {  
   case "$1" in
-    "version")    echo "ght $GHTOOLS_VERSION (c) Tom Nussbaumer <thomas.nussbaumer@gmx.net>";;
+    "version")    echo "Github Tools - v$GHTOOLS_VERSION - Copyright (c) 2015 Tom Nussbaumer <thomas.nussbaumer@gmx.net>";;
     "help")       gh_help;;
     "clone")      shift; gh_clone      "$@";;
     "info")       shift; gh_info_json  "$@";;
@@ -253,6 +254,9 @@ ght () {
     "repos-urls") shift; gh_repos_urls "$@";;
     "repos-json") shift; gh_repos_json "$@";;
     "backup")     shift; gh_backup     "$@";;
+    "debug")      GHTOOLS_DEBUG="$2"
+                  [ -z "$GHTOOLS_DEBUG" ] && __gh_info "debug=off" || __gh_info "debug=on";;
     *)            gh_help;;
   esac
 }
+
