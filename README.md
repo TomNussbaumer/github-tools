@@ -22,6 +22,9 @@ repos-urls [user-id]   ... returns list of repository urls
 repos-json [user-id]   ... returns repos informations in json format
 backup [user-id]       ... loop through all repos of a user account and either
                            clones them or uses 'git pull' to update them.
+root [abspath]         ... set prefix for command go
+go <relpath>           ... changes to dir <root>/<relpath> if root is set 
+debug [on]             ... enables/disables debug (without parameter == off]
 
 If you omit the optional parameter user-id, the name of the current working 
 directory will be used as github user-id.
@@ -53,8 +56,7 @@ The github tools doesn't come in the usual script form, but are meant to be sour
 When you are using bash, the startup script is called '.bashrc' and is located in your home directory. Just store file `github-tools-includes` somewhere on your computer and append the following line to file `.bashrc`:
 
 ```shell
-# Note the dot at the beginning of the line followed by a space!
-. path-to-file/github-tools-includes
+source path-to-file/github-tools-includes
 ```
 
 **...OR...** 
@@ -79,8 +81,8 @@ There is a simple test script called `test-github-tools.sh` to verify the correc
 Beware of github user `tmp` while testing ;)
 
 
-### TODO
+### Changelog
 
-  1. Add bash commandline completion (really?)
-
-
+  * 2015-08-19 (v1.2.0): new commands `root` and `go` (for quick navigation)
+  * 2015-08-19 (v1.1.0): new command `debug` (debug output on/off)
+  * 2015-09-18 (v1.0.0): initial version
