@@ -33,8 +33,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-export GHTOOLS_VERSION="1.1.0 (beta)"
+export GHTOOLS_VERSION="1.2.0"
 export GHTOOLS_DEBUG=
+export GHTOOLS_ROOT=
 
 gh_help () {
   cat << END-OF-USAGE-TEXT
@@ -51,6 +52,8 @@ repos-urls [user-id]   ... returns list of repository urls
 repos-json [user-id]   ... returns repos informations in json format
 backup [user-id]       ... loop through all repos of a user account and either
                            clones them or uses 'git pull' to update them.
+root [abspath]         ... set prefix for command go
+go <relpath>           ... changes to dir <root>/<relpath> if root is set 
 debug [on]             ... enables/disables debug (without parameter == off]
 
 If you omit the optional parameter user-id, the name of the active working 
@@ -254,6 +257,9 @@ ght () {
     "repos-urls") shift; gh_repos_urls "$@";;
     "repos-json") shift; gh_repos_json "$@";;
     "backup")     shift; gh_backup     "$@";;
+    "root")       GHTOOLS_ROOT="$2"
+                  [ -z "$GHTOOLS_ROOT" ] && __gh_info "no root set" || __gh_info "root=$GHTOOLS_ROOT";;
+    "go")         [ -n "$GHTOOLS_ROOT" ] && cd "$GHTOOLS_ROOT/$2" || __gh_info "root not set";;
     "debug")      GHTOOLS_DEBUG="$2"
                   [ -z "$GHTOOLS_DEBUG" ] && __gh_info "debug=off" || __gh_info "debug=on";;
     *)            gh_help;;
