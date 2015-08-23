@@ -11,6 +11,7 @@ cd "$HOME"
 if [ -f .bashrc ]; then
    if [ -z "$(grep $GHTFILE .bashrc)" ]; then
       echo "[INFO] appending \". ./$GHTFILE\" to .bashrc"
+      echo "" >> .bashrc   # required (if there is no newline at end of .bashrc)
       echo ". \"\$HOME/$GHTFILE\"" >> .bashrc
    fi
    if [ -z "$GHTLOCALFILE" ]; then
@@ -20,7 +21,7 @@ if [ -f .bashrc ]; then
      echo "[INFO] local copy from [$GHTLOCALFILE] to [$GHTHOMEFILE]"
      cp "$GHTLOCALFILE" "$GHTHOMEFILE"
    fi
-   
+
    echo "[INFO] To use the github tools in the current shell please execute the"
    echo "[INFO] following line to refresh the environment settings:"
    echo
