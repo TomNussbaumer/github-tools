@@ -33,7 +33,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-export GHTOOLS_VERSION="1.2.0"
+export GHTOOLS_VERSION="1.2.1"
 export GHTOOLS_DEBUG=
 export GHTOOLS_ROOT=
 
@@ -257,9 +257,29 @@ ght () {
     "repos-urls") shift; gh_repos_urls "$@";;
     "repos-json") shift; gh_repos_json "$@";;
     "backup")     shift; gh_backup     "$@";;
-    "root")       GHTOOLS_ROOT="$2"
-                  [ -z "$GHTOOLS_ROOT" ] && __gh_info "no root set" || __gh_info "root=$GHTOOLS_ROOT";;
-    "go")         [ -n "$GHTOOLS_ROOT" ] && cd "$GHTOOLS_ROOT/$2" || __gh_info "root not set";;
+    "root")       if [ -z "$2" ]; then
+                    GHTOOLS_ROOT=""
+                    __gh_info "root unset"
+                    return 0
+                  fi
+                  if [ ! -d "$2" ]; then
+                    __gh_warn "non-existing directory [$2]"
+                    return 1
+                  fi
+                  GHTOOLS_ROOT="$2" 
+                  __gh_info "root=$GHTOOLS_ROOT";;
+    "go")         if [ -n "$GHTOOLS_ROOT" ]; then
+                    if [ -d "$GHTOOLS_ROOT/$2" ]; then
+                      cd "$GHTOOLS_ROOT/$2"
+                    else
+                      __gh_warn "non-existing directory [$GHTOOLS_ROOT/$2]"
+                      return 1
+                    fi
+                  else  
+                    __gh_warn "no root set. use 'ght root' to set a root."
+                    return 1
+                  fi
+                  ;;
     "debug")      GHTOOLS_DEBUG="$2"
                   [ -z "$GHTOOLS_DEBUG" ] && __gh_info "debug=off" || __gh_info "debug=on";;
     *)            gh_help;;
