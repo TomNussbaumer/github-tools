@@ -249,7 +249,7 @@ gh_backup () {
 
 ght () {  
   case "$1" in
-    "version")    echo "Github Tools - v$GHTOOLS_VERSION - Copyright (c) 2015 Tom Nussbaumer <thomas.nussbaumer@gmx.net>";;
+    "version")    echo "Github Tools v$GHTOOLS_VERSION - (c) 2015 Tom Nussbaumer <thomas.nussbaumer@gmx.net>";;
     "help")       gh_help;;
     "clone")      shift; gh_clone      "$@";;
     "info")       shift; gh_info_json  "$@";;
