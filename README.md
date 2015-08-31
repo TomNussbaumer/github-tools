@@ -15,19 +15,23 @@ commands:
 
 help                   ... displays this page
 version                ... displays version info
-clone <repo> [user-id] ... clones a repository 
-info  [user-id]        ... returns account informations in json format 
-repos [user-id]        ... returns list of repository names 
+clone <repo>           ... clones a repository
+info  [user-id]        ... returns account informations in json format
+repos [user-id]        ... returns list of repository names
 repos-urls [user-id]   ... returns list of repository urls
 repos-json [user-id]   ... returns repos informations in json format
-backup [user-id]       ... loop through all repos of a user account and either
-                           clones them or uses 'git pull' to update them.
+backup [user-id]       ... loop through all repos of a user account and
+                           either clones them or uses 'git pull'.
 root [abspath]         ... set prefix for command go
-go <relpath>           ... changes to dir <root>/<relpath> if root is set 
-debug [on]             ... enables/disables debug (without parameter == off]
+go <relpath>           ... changes to dir <root>/<relpath> if root is set
+debug [on]             ... enables/disables debug
+                           (without parameter == off]
+import [user-id]       ... imports current git repo to github (note: the
+                           user-id is derived from parent dir)
 
-If you omit the optional parameter user-id, the name of the current working 
-directory will be used as github user-id.
+
+If you omit the optional parameter user-id, the name of the active
+working directory will be used as github user-id.
 ```
 
 ### Example usage
@@ -41,7 +45,7 @@ ght repos
 ght clone github-tools
 ```
 
-The ```ght backup``` may also be useful, if you want to get all repositories of a user and keep them up-to-date later on. 
+The ```ght backup``` may also be useful, if you want to get all repositories of a user and keep them up-to-date later on.
 
 ### Installation
 
@@ -59,7 +63,7 @@ When you are using bash, the startup script is called '.bashrc' and is located i
 source path-to-file/github-tools-includes
 ```
 
-**...OR...** 
+**...OR...**
 
 **... just copy-and-paste the following line into a terminal window:**
 
@@ -81,8 +85,14 @@ There is a simple test script called `test-github-tools.sh` to verify the correc
 Beware of github user `tmp` while testing ;)
 
 
+### TODO
+
+Sourcing the whole functionality is somewhat stupid, I know. It just has grown this way from a few simple aliases and functions. If there is some spare time in the future I will convert it.
+
+
 ### Changelog
 
+  * 2015-08-30 (v1.3.0): new command `import`
   * 2015-08-19 (v1.2.0): new commands `root` and `go` (for quick navigation)
   * 2015-08-19 (v1.1.0): new command `debug` (debug output on/off)
   * 2015-09-18 (v1.0.0): initial version
